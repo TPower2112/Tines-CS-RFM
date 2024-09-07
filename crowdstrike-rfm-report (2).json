@@ -1,0 +1,1376 @@
+{
+  "schema_version": 20,
+  "standard_lib_version": 57,
+  "action_runtime_version": 12,
+  "name": "CrowdStrike RFM Report",
+  "description": null,
+  "guid": "f5a0a6d7c2b46543477a388b441c1ad5",
+  "slug": "crowdstrike_rfm_report",
+  "agents": [
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Explode Device IDs",
+      "disabled": false,
+      "description": null,
+      "guid": "2678c62216738d91297d97fc0f3bc997",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:bac1778d8b4dce1bb66630941d1ec794",
+      "options": {
+        "mode": "explode",
+        "path": "=host_array.array",
+        "to": "device_id",
+        "limit": "50000"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Host Array",
+      "disabled": false,
+      "description": null,
+      "guid": "d9bd5c3359df6cee938b42c23d820f4d",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:d8aa079f947e2159d27bd579e71d131d",
+      "options": {
+        "mode": "message_only",
+        "loop": false,
+        "payload": {
+          "array": "=get_all_rfm_hosts_in_crowdstrike_last_7_days.body.resources"
+        }
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": true,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::TriggerAgent",
+      "name": "Trigger Action",
+      "disabled": false,
+      "description": null,
+      "guid": "18145517ba741f1cf62cf6cd1cc8118c",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:d8aa079f947e2159d27bd579e71d131d",
+      "options": {
+        "rules": [
+          {
+            "path": "<<get_all_rfm_hosts_in_crowdstrike_last_7_days.body.meta.pagination.total>>",
+            "type": "field!=value",
+            "value": "0"
+          }
+        ]
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": true,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Delay 2 Seconds",
+      "disabled": false,
+      "description": null,
+      "guid": "47d8c22173e0caccc9f09a165899d4bf",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:d8aa079f947e2159d27bd579e71d131d",
+      "options": {
+        "mode": "delay",
+        "seconds": "2"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": true,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Host Array",
+      "disabled": false,
+      "description": null,
+      "guid": "9f5531a991aadf22c3048b6f1305858b",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:d8aa079f947e2159d27bd579e71d131d",
+      "options": {
+        "mode": "message_only",
+        "loop": false,
+        "payload": {
+          "array": "=CONCAT(get_all_rfm_hosts_in_crowdstrike_last_7_days.body.resources,host_array.array)"
+        }
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": true,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::HTTPRequestAgent",
+      "name": "Get All RFM Hosts in CrowdStrike last 7 Days",
+      "disabled": false,
+      "description": "Gets a host by a local IP address in Crowdstrike",
+      "guid": "fe59f8104d016e39781ef14f15bfffa0",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:20f14b3fed50de0560d067338293ca98",
+      "options": {
+        "url": "https://api.<<RESOURCE.crowdstrike_domain>>/devices/queries/devices-scroll/v1?offset=<<get_all_rfm_hosts_in_crowdstrike_last_7_days.body.meta.pagination.offset>>",
+        "content_type": "json",
+        "method": "get",
+        "headers": {
+          "Authorization": "Bearer <<CREDENTIAL.prod_crowdstrike_host_ro>>"
+        },
+        "payload": {
+          "filter": "last_seen:>=\"<<DATE(\"7 days ago\",\"%Y-%m-%d\")>>\""
+        }
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": "313d53cdc52002ab98ddd5068d677decf407d0366cc99e252a27ab8e70d2c0bd",
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": []
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Append Host Info",
+      "disabled": false,
+      "description": null,
+      "guid": "265caa9b70edccfede4f38c863d5e1fd",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:0614bf383c47ed843006d0fb2b5ce421",
+      "options": {
+        "mode": "message_only",
+        "loop": false,
+        "payload": {
+          "host_object": "=OBJECT(\n\"hostname\", get_device_by_id_in_crowdstrike.body.resources[0].hostname,\n\"platform\", get_device_by_id_in_crowdstrike.body.resources[0].platform_name,\n\"OS version\", get_device_by_id_in_crowdstrike.body.resources[0].os_version,\n\"kernel version\", get_device_by_id_in_crowdstrike.body.resources[0].kernel_version)"
+        }
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::HTTPRequestAgent",
+      "name": "Write Host Info to Results Resource",
+      "disabled": false,
+      "description": "Append a string or an array to a resource. If the resource has a test value this can be modified by using the is_test parameter.\n\nLink to API documentation: https://www.tines.com/api/resources/append-element",
+      "guid": "964cc453fc9d05e811039c6decec85b3",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:d8aa079f947e2159d27bd579e71d131d",
+      "options": {
+        "url": "https://<<INPUT.tenant_domain>>/api/v1/global_resources/<<INPUT.resource_id>>/append",
+        "method": "post",
+        "headers": {
+          "Authorization": "Bearer <<INPUT.tines_credential>>"
+        },
+        "content_type": "application_json",
+        "local": {
+          "all_parameters": {
+            "value": "=DEFAULT(INPUT.text_value, INPUT.array_value)",
+            "is_test": "=INPUT.is_test_resource"
+          },
+          "final_payload": "=REJECT(\n  LOCAL.all_parameters,\n  LAMBDA(\n    item,\n    OR(\n      item = NULL,\n      IF(\n        OR(\n          TYPE(item) = \"TrueClass\",\n          TYPE(item) = \"FalseClass\",\n          TYPE(item) = \"Integer\"\n        ),\n        IS_EMPTY(TEXT(item)),\n        IS_EMPTY(item)\n      )\n    )\n  )\n)"
+        },
+        "payload": "=LOCAL.final_payload"
+      },
+      "reporting": {
+        "time_saved_value": 15,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": "b40e331f2e157852280d1116aff9f928555943a8fb098475fb5e987014e3e238",
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "CS RFM Weekly Audit -Objects to CSV",
+      "disabled": false,
+      "description": null,
+      "guid": "1b4ca10bb5255a34e5d559fa02c6687a",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:d8aa079f947e2159d27bd579e71d131d",
+      "options": {
+        "mode": "message_only",
+        "loop": false,
+        "payload": {
+          "message": "<<OBJECTS_TO_CSV(RESOURCE.cs_rfm_status_host_report)>>"
+        }
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::HTTPRequestAgent",
+      "name": "Purge CS RFM Reporting Results",
+      "disabled": false,
+      "description": "Clear a resource value in Tines.\n\nLink to API documentation: https://www.tines.com/api/resources/update",
+      "guid": "39cc1dcc27c51206a910510586d2d8a9",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:d8aa079f947e2159d27bd579e71d131d",
+      "options": {
+        "url": "https://<<INPUT.tenant_domain>>/api/v1/global_resources/<<INPUT.resource_id>>",
+        "method": "put",
+        "headers": {
+          "Authorization": "Bearer <<INPUT.tines_credential>>"
+        },
+        "content_type": "application_json",
+        "local": {
+          "all_parameters": {
+            "name": "=INPUT.resource_name",
+            "folder_id": "=INPUT.folder_id",
+            "read_access": "=DEFAULT(INPUT.read_access[0], \"TEAM\")",
+            "shared_team_slugs": "=IF(INPUT.read_access[0]= \"SPECIFIC_TEAMS\", SPLIT(DOWNCASE(REPLACE(INPUT.shared_team_names, \" \", \"_\")), \",\"), [])",
+            "description": "<<INPUT.description>>",
+            "test_resource_enabled": "=INPUT.test_resource_enabled",
+            "is_test": "=INPUT.is_test_resource"
+          },
+          "final_payload": "=REJECT(\n  LOCAL.all_parameters,\n  LAMBDA(\n    item,\n    OR(\n      item = NULL,\n      IF(\n        OR(\n          TYPE(item) = \"TrueClass\",\n          TYPE(item) = \"FalseClass\",\n          TYPE(item) = \"Integer\"\n        ),\n        IS_EMPTY(TEXT(item)),\n        IS_EMPTY(item)\n      )\n    )\n  )\n)",
+          "add_value_field": "=MERGE(LOCAL.final_payload, OBJECT(\"value\", INPUT.json_resource_value))"
+        },
+        "payload": "=LOCAL.add_value_field"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": "75cfb7a96df45614d8921490cb34c1fa3c51f0c3739b35438ba8f811623ca37e",
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::EmailAgent",
+      "name": "Email EDR Weekly Audit",
+      "disabled": false,
+      "description": null,
+      "guid": "85f5998edbfe518736305caa484afc78",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:d8aa079f947e2159d27bd579e71d131d",
+      "options": {
+        "recipients": [
+          "security.analyst@mycompany.com"
+        ],
+        "reply_to": "sec.ops@mycompany.ca",
+        "sender_name": "Tines CrowdStrike RFM Weekly Audit Workflow",
+        "subject": "CrowdStrike RFM Weekly Audit - Host Report - Number of Hosts in RFM: <<explode_device_ids.size>>",
+        "body": "The Tines CrowdStrike RFM Weekly Workflow generated this report from CrowdStrike Falcon.\n\n<<html_summary_table.output>>\n",
+        "advanced_html": true,
+        "attachments": [
+          {
+            "filename": "<<TODAY()>>- CS_RFM_Status_Weekly_Audit.csv",
+            "base64encodedcontents": "<<BASE64_ENCODE(cs_rfm_weekly_audit_objects_to_csv.message)>>",
+            "content_type": "auto"
+          }
+        ]
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::HTTPRequestAgent",
+      "name": "Get All RFM Hosts in CrowdStrike last 7 Days",
+      "disabled": false,
+      "description": "Gets a host by a local IP address in Crowdstrike",
+      "guid": "a9d6e9ed10ed88e5052f599657702129",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:20f14b3fed50de0560d067338293ca98",
+      "options": {
+        "url": "https://api.<<RESOURCE.crowdstrike_domain>>/devices/queries/devices-scroll/v1?limit=100",
+        "content_type": "json",
+        "method": "get",
+        "headers": {
+          "Authorization": "Bearer <<CREDENTIAL.prod_crowdstrike_host_ro>>"
+        },
+        "payload": {
+          "filter": "reduced_functionality_mode:'yes'+last_seen:>=\"<<DATE(\"7 days ago\",\"%Y-%m-%d\")>>\""
+        }
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": "313d53cdc52002ab98ddd5068d677decf407d0366cc99e252a27ab8e70d2c0bd",
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": [
+        {
+          "cron": "0 7 * * 1,5",
+          "timezone": "America/Vancouver"
+        }
+      ]
+    },
+    {
+      "type": "Agents::HTTPRequestAgent",
+      "name": "Get Device by ID in CrowdStrike",
+      "disabled": false,
+      "description": "Retrieve Details about a Device in CrowdStrike Falcon using it's Device ID (AID)",
+      "guid": "41b7907ac35531b66a72f75ada5f7688",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:bac1778d8b4dce1bb66630941d1ec794",
+      "options": {
+        "url": "https://api.<<RESOURCE.crowdstrike_domain>>/devices/entities/devices/v1/",
+        "content_type": "json",
+        "method": "get",
+        "payload": {
+          "ids": "<<explode_device_ids.device_id>>"
+        },
+        "headers": {
+          "Authorization": "Bearer <<CREDENTIAL.prod_crowdstrike_host_ro>>"
+        }
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": "10ab1533db2c94846d8ad38d62583a8d0ac995676e6c5064188223bb54f0cd84",
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Implode Device IDs",
+      "disabled": false,
+      "description": null,
+      "guid": "1dbe3eab38670a70e4f50b5c00b2d4b1",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:bac1778d8b4dce1bb66630941d1ec794",
+      "options": {
+        "mode": "implode",
+        "item_path": "=explode_device_ids.AID",
+        "guid_path": "=explode_device_ids.guid",
+        "size_path": "=explode_device_ids.size"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Delay 10 seconds",
+      "disabled": false,
+      "description": null,
+      "guid": "c947810d1ca0619ef34eaf6a813310e5",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:bac1778d8b4dce1bb66630941d1ec794",
+      "options": {
+        "mode": "delay",
+        "seconds": "10"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Delay 2 seconds",
+      "disabled": false,
+      "description": null,
+      "guid": "0373a7ac54f77df986d71f012f953175",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:bac1778d8b4dce1bb66630941d1ec794",
+      "options": {
+        "mode": "delay",
+        "seconds": "2"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Throttle",
+      "disabled": false,
+      "description": null,
+      "guid": "2fc34d71836b68b24fbc9d3c86dcaba4",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:bac1778d8b4dce1bb66630941d1ec794",
+      "options": {
+        "mode": "throttle",
+        "interval": "minute",
+        "capacity": 10,
+        "events_per_run": "5"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Count the number of Linux hosts per platform in the RFM report",
+      "disabled": false,
+      "description": null,
+      "guid": "b97c6bfbf32e2cfa0ee6df2bd5e4dd77",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:bac1778d8b4dce1bb66630941d1ec794",
+      "options": {
+        "mode": "automatic",
+        "input": "=RESOURCE.cs_rfm_status_host_report",
+        "guidance": "Count the number of Linux hosts",
+        "language": "Python",
+        "script": "def main(input):\n    linux_hosts = 0\n    for host in input:\n        if host.get('platform') == 'Linux':\n            linux_hosts += 1\n    return linux_hosts"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Count the number of Windows hosts in the RFM report",
+      "disabled": false,
+      "description": null,
+      "guid": "c9b4d4cb273b3709351fb8119ce85c5b",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:bac1778d8b4dce1bb66630941d1ec794",
+      "options": {
+        "mode": "automatic",
+        "input": "=RESOURCE.cs_rfm_status_host_report",
+        "guidance": "Count the number of Windows hosts",
+        "language": "Python",
+        "script": "def main(input):\n    windows_count = 0\n    for host in input:\n        if host.get('platform') == 'Windows':\n            windows_count += 1\n    return windows_count"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Count the number of Mac hosts in the RFM report",
+      "disabled": false,
+      "description": null,
+      "guid": "d6d7dc4130efa73f01aa89fa64c76945",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:bac1778d8b4dce1bb66630941d1ec794",
+      "options": {
+        "mode": "automatic",
+        "input": "=RESOURCE.cs_rfm_status_host_report",
+        "guidance": "Count the number of Mac hosts",
+        "language": "Python",
+        "script": "def main(input):\n    mac_count = 0\n    for host in input:\n        if host.get('platform') == 'Mac':\n            mac_count += 1\n    return mac_count"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "Append RFM Host Numbers",
+      "disabled": false,
+      "description": null,
+      "guid": "5c78885b84e4cc7c7ee02199c68a23e6",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:0614bf383c47ed843006d0fb2b5ce421",
+      "options": {
+        "mode": "message_only",
+        "loop": false,
+        "payload": {
+          "weekly_object": "=OBJECT(\n\"Weekly Date\", DATE(\"now\", \"%Y-%m-%d\"), \n\"number of Linux hosts\", count_the_number_of_linux_hosts_per_platform_in_the_rfm_report.output,\n\"number of Mac hosts\", \ncount_the_number_of_mac_hosts_in_the_rfm_report.output,\n\"number of Windows hosts\", count_the_number_of_windows_hosts_in_the_rfm_report.output)"
+        }
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::HTTPRequestAgent",
+      "name": "Write RFM Count Info to Results Resource",
+      "disabled": false,
+      "description": "Append a string or an array to a resource. If the resource has a test value this can be modified by using the is_test parameter.\n\nLink to API documentation: https://www.tines.com/api/resources/append-element",
+      "guid": "8912b702456dbf68a66d317e927053aa",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:d8aa079f947e2159d27bd579e71d131d",
+      "options": {
+        "url": "https://<<INPUT.tenant_domain>>/api/v1/global_resources/<<INPUT.resource_id>>/append",
+        "method": "post",
+        "headers": {
+          "Authorization": "Bearer <<INPUT.tines_credential>>"
+        },
+        "content_type": "application_json",
+        "local": {
+          "all_parameters": {
+            "value": "=DEFAULT(INPUT.text_value, INPUT.array_value)",
+            "is_test": "=INPUT.is_test_resource"
+          },
+          "final_payload": "=REJECT(\n  LOCAL.all_parameters,\n  LAMBDA(\n    item,\n    OR(\n      item = NULL,\n      IF(\n        OR(\n          TYPE(item) = \"TrueClass\",\n          TYPE(item) = \"FalseClass\",\n          TYPE(item) = \"Integer\"\n        ),\n        IS_EMPTY(TEXT(item)),\n        IS_EMPTY(item)\n      )\n    )\n  )\n)"
+        },
+        "payload": "=LOCAL.final_payload"
+      },
+      "reporting": {
+        "time_saved_value": 15,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": "b40e331f2e157852280d1116aff9f928555943a8fb098475fb5e987014e3e238",
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    },
+    {
+      "type": "Agents::EventTransformationAgent",
+      "name": "HTML Summary Table",
+      "disabled": false,
+      "description": null,
+      "guid": "bfde344d44633e501ee69f894c673a73",
+      "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:bac1778d8b4dce1bb66630941d1ec794",
+      "options": {
+        "mode": "automatic",
+        "input": "=RESOURCE.rfm_count_weekly_results",
+        "guidance": "Create an html table to summarize",
+        "language": "Python",
+        "script": "def main(input):\n    rows = []\n    for item in input:\n        row = [\n            item.get('Weekly Date'),\n            item.get('number of Linux hosts'),\n            item.get('number of Mac hosts'),\n            item.get('number of Windows hosts')\n        ]\n        rows.append(row)\n\n    table = '<table>\\n'\n    table += '  <tr>\\n'\n    table += '    <th>Weekly Date</th>\\n'\n    table += '    <th>Linux Hosts</th>\\n'\n    table += '    <th>Mac Hosts</th>\\n'\n    table += '    <th>Windows Hosts</th>\\n'\n    table += '  </tr>\\n'\n\n    for row in rows:\n        table += '  <tr>\\n'\n        for cell in row:\n            table += f'    <td>{cell}</td>\\n'\n        table += '  </tr>\\n'\n\n    table += '</table>'\n    return table"
+      },
+      "reporting": {
+        "time_saved_value": 0,
+        "time_saved_unit": "minutes"
+      },
+      "monitoring": {
+        "monitor_all_events": false,
+        "monitor_failures": false,
+        "monitor_no_events_emitted": null
+      },
+      "template": {
+        "created_from_template_guid": null,
+        "created_from_template_version": null,
+        "template_tags": []
+      },
+      "width": null,
+      "schedule": null
+    }
+  ],
+  "diagram_notes": [
+    {
+      "content": "https://image-uploads.tines.com/CrowdStrike_logo_no_background.png",
+      "position": [
+        1755,
+        -345
+      ],
+      "guid": "c925e974c502bb6278e385b943b1f8f7",
+      "width": 346
+    },
+    {
+      "content": "## Requirements:\n\n- Create a CrowdStrike OAuth2 API Client/Secret key pair that is scoped for Read Only Hosts.\n\n- Create a two Tines Resource to store results during the workflow. \n\nThis story checks for the Falcon Sensor Reduced Functionality Mode (RFM) Status within the last 7 days which can be modified in the HTTP Request filter parameter. \n\nOnce the story is published, schedule the story to run on a weekly basis.",
+      "position": [
+        1755,
+        -120
+      ],
+      "guid": "91f2f7fb92ff1dc663ea7b2756748ed9",
+      "width": 343
+    },
+    {
+      "content": "A 2 second delay to prevent rate limiting.",
+      "position": [
+        2940,
+        -15
+      ],
+      "guid": "81f77270f7cf4f6be55cb77eb8751dfb",
+      "width": 270
+    },
+    {
+      "content": "A 10 second delay to allow for the creation of the host object.  If there are a large number of RFM Hosts, a throttle action can substitute the delay action.",
+      "position": [
+        2640,
+        465
+      ],
+      "guid": "45a5b9a8c80fd3a192af2d28aa22695a",
+      "width": 270
+    },
+    {
+      "content": "Throttle events to allow writing of host information to the Tines Resource.",
+      "position": [
+        2085,
+        735
+      ],
+      "guid": "c955369f2238110605e7902b0366b97e",
+      "width": 270
+    },
+    {
+      "content": "If Tines Cases and Records are enabled for the Tenant, they can be utilized instead of Tines Resources.",
+      "position": [
+        1755,
+        165
+      ],
+      "guid": "3a594022660d36e7fc14cd6bd8677c86",
+      "width": 334
+    },
+    {
+      "content": "The pagination loop works when the HTTP Request action within the loop has the same name as the initial HTTP Request action.",
+      "position": [
+        2340,
+        -105
+      ],
+      "guid": "f38958508224d906579cf6efee9a8fba",
+      "width": 277
+    },
+    {
+      "content": "Use the AI Automatic mode to count the numbers of RFM Host by Platform.",
+      "position": [
+        2055,
+        1110
+      ],
+      "guid": "90057cc4c850319875d6b1381532e77c",
+      "width": 270
+    },
+    {
+      "content": "Use the AI Automatic mode to create an HTML Summary Table of the Host Count by Platform.",
+      "position": [
+        2055,
+        1785
+      ],
+      "guid": "d79f072391631abc3ba0d0623bb4b556",
+      "width": 270
+    }
+  ],
+  "links": [
+    {
+      "source": 0,
+      "receiver": 15
+    },
+    {
+      "source": 1,
+      "receiver": 2
+    },
+    {
+      "source": 2,
+      "receiver": 0,
+      "secondary": true
+    },
+    {
+      "source": 2,
+      "receiver": 3
+    },
+    {
+      "source": 3,
+      "receiver": 5
+    },
+    {
+      "source": 4,
+      "receiver": 2
+    },
+    {
+      "source": 5,
+      "receiver": 4
+    },
+    {
+      "source": 6,
+      "receiver": 16
+    },
+    {
+      "source": 7,
+      "receiver": 13
+    },
+    {
+      "source": 8,
+      "receiver": 10
+    },
+    {
+      "source": 10,
+      "receiver": 9
+    },
+    {
+      "source": 11,
+      "receiver": 1
+    },
+    {
+      "source": 12,
+      "receiver": 14
+    },
+    {
+      "source": 13,
+      "receiver": 17
+    },
+    {
+      "source": 14,
+      "receiver": 6
+    },
+    {
+      "source": 15,
+      "receiver": 12
+    },
+    {
+      "source": 16,
+      "receiver": 7
+    },
+    {
+      "source": 17,
+      "receiver": 18
+    },
+    {
+      "source": 18,
+      "receiver": 19
+    },
+    {
+      "source": 19,
+      "receiver": 20
+    },
+    {
+      "source": 20,
+      "receiver": 21
+    },
+    {
+      "source": 21,
+      "receiver": 22
+    },
+    {
+      "source": 22,
+      "receiver": 8
+    }
+  ],
+  "diagram_layout": "{\"2678c62216738d91297d97fc0f3bc997\":[2415,120],\"d9bd5c3359df6cee938b42c23d820f4d\":[2730,-165],\"18145517ba741f1cf62cf6cd1cc8118c\":[2730,-75],\"47d8c22173e0caccc9f09a165899d4bf\":[2730,0],\"9f5531a991aadf22c3048b6f1305858b\":[2730,150],\"fe59f8104d016e39781ef14f15bfffa0\":[2730,75],\"265caa9b70edccfede4f38c863d5e1fd\":[2415,615],\"964cc453fc9d05e811039c6decec85b3\":[2415,855],\"1b4ca10bb5255a34e5d559fa02c6687a\":[2415,1905],\"39cc1dcc27c51206a910510586d2d8a9\":[2415,2160],\"85f5998edbfe518736305caa484afc78\":[2415,2040],\"a9d6e9ed10ed88e5052f599657702129\":[2730,-255],\"41b7907ac35531b66a72f75ada5f7688\":[2415,360],\"1dbe3eab38670a70e4f50b5c00b2d4b1\":[2415,990],\"c947810d1ca0619ef34eaf6a813310e5\":[2415,495],\"0373a7ac54f77df986d71f012f953175\":[2415,240],\"2fc34d71836b68b24fbc9d3c86dcaba4\":[2415,735],\"b97c6bfbf32e2cfa0ee6df2bd5e4dd77\":[2415,1110],\"c9b4d4cb273b3709351fb8119ce85c5b\":[2415,1260],\"d6d7dc4130efa73f01aa89fa64c76945\":[2415,1395],\"5c78885b84e4cc7c7ee02199c68a23e6\":[2415,1530],\"8912b702456dbf68a66d317e927053aa\":[2415,1650],\"bfde344d44633e501ee69f894c673a73\":[2415,1785]}",
+  "send_to_story_enabled": false,
+  "entry_agent_guid": null,
+  "exit_agent_guids": [],
+  "exit_agent_guid": null,
+  "api_entry_action_guids": [],
+  "api_exit_action_guids": [],
+  "keep_events_for": 604800,
+  "reporting_status": true,
+  "send_to_story_access": null,
+  "story_library_metadata": {
+    "tags": [
+      "CrowdStrike",
+      "SecOps"
+    ]
+  },
+  "parent_only_send_to_story": false,
+  "monitor_failures": false,
+  "send_to_stories": [],
+  "form": null,
+  "synchronous_webhooks_enabled": false,
+  "send_to_story_access_source": 0,
+  "forms": [],
+  "pages": [],
+  "tags": [
+    {
+      "name": "CrowdStrike"
+    },
+    {
+      "name": "SecOps"
+    }
+  ],
+  "time_saved_unit": "minutes",
+  "time_saved_value": 0,
+  "origin_story_identifier": "cloud:256caef50de818d681816208610a2c92:f5a0a6d7c2b46543477a388b441c1ad5",
+  "integration_product": null,
+  "integration_vendor": null,
+  "llm_product_instructions": "",
+  "exported_at": "2024-09-07T17:57:26Z",
+  "icon": ":adhesive_bandage:",
+  "integrations": [
+    {
+      "action_inputs": [
+        {
+          "name": "Tenant domain",
+          "description": "The domain of the tenant.",
+          "required": true,
+          "type": "TEXT",
+          "ranking": 0,
+          "value": "\"<<META.tenant.domain>>\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Tines credential",
+          "description": "",
+          "required": false,
+          "type": "CREDENTIAL",
+          "ranking": 1073741824,
+          "value": "\"=CREDENTIAL.tines_resource_api_secret\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Resource ID",
+          "description": "The ID of the resource you are querying for. You can identify this with the INFO key.",
+          "required": false,
+          "type": "NUMBER",
+          "ranking": 1610612736,
+          "value": "\"=INFO.resource.cs_rfm_status_host_report.id\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Is test resource?",
+          "description": "Select 'yes' to append an element to the test resource.",
+          "required": false,
+          "type": "BOOLEAN",
+          "ranking": 1879048192,
+          "value": "\"\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Array value",
+          "description": "The array to append to the resource. Use this input instead of the 'Text value' input if you are appending an array.",
+          "required": false,
+          "type": "OBJECT",
+          "ranking": 2013265920,
+          "value": "\"=append_host_info.host_object\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Text value",
+          "description": "The text to append to the resource. Use this input instead of the 'Array value' input if you are just appending text.",
+          "required": false,
+          "type": "TEXT",
+          "ranking": 2080374784,
+          "value": "\"\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        }
+      ],
+      "action_guid": "964cc453fc9d05e811039c6decec85b3",
+      "product": "Tines"
+    },
+    {
+      "action_inputs": [
+        {
+          "name": "Tenant domain",
+          "description": "The domain of the tenant.",
+          "required": true,
+          "type": "TEXT",
+          "ranking": 0,
+          "value": "\"<<META.tenant.domain>>\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Shared team names",
+          "description": "Comma separated list of teams' names where this resource can be used. Required to set 'read access' parameter to 'SPECIFIC_TEAMS'.",
+          "required": false,
+          "type": "TEXT",
+          "ranking": 1073741824,
+          "value": "\"\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Tines credential",
+          "description": "",
+          "required": false,
+          "type": "CREDENTIAL",
+          "ranking": 1610612736,
+          "value": "\"=CREDENTIAL.tines_resource_api_secret\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Folder ID",
+          "description": "ID of the folder where the resource will be located. You can identify the folder ID within the URL of your Tines tenant on the tenant overview page by selecting an item within the folder.",
+          "required": false,
+          "type": "NUMBER",
+          "ranking": 1879048192,
+          "value": "\"\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Read access",
+          "description": "Control where this resource can be used. Defaults to 'team'. The 'specific teams' option is a premium feature that may not be available in your tenant and if used requires the additional parameter 'Shared team names'.",
+          "required": false,
+          "type": "OPTION",
+          "ranking": 2013265920,
+          "value": "\"\"",
+          "options": [
+            "TEAM",
+            "GLOBAL",
+            "SPECIFIC_TEAMS"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Description",
+          "description": "Description of the resource.",
+          "required": false,
+          "type": "TEXT",
+          "ranking": 2080374784,
+          "value": "\"\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Resource ID",
+          "description": "The ID of the resource you are querying for. You can identify this with the INFO key.",
+          "required": true,
+          "type": "NUMBER",
+          "ranking": 2113929216,
+          "value": "\"=INFO.resource.cs_rfm_status_host_report.id\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Resource name",
+          "description": "Name of the resource.",
+          "required": false,
+          "type": "TEXT",
+          "ranking": 2130706432,
+          "value": "\"\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Test resource enabled?",
+          "description": "Select 'yes' if the resource is enabled for using a test resource.",
+          "required": false,
+          "type": "BOOLEAN",
+          "ranking": 2139095040,
+          "value": "\"\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "Is test resource?",
+          "description": "Select 'yes' if the updated value should apply to the test resource rather than the live resource.",
+          "required": false,
+          "type": "BOOLEAN",
+          "ranking": 2143289344,
+          "value": "\"\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        },
+        {
+          "name": "JSON resource value",
+          "description": "The value of the resource. This can be an object with key/value pairs or an array of values. If you'd like to update a different part of the resource and keep the same value, just use a pill in formula mode referencing your resource.",
+          "required": true,
+          "type": "OBJECT",
+          "ranking": 2145386496,
+          "value": "[]",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"{}\""
+        }
+      ],
+      "action_guid": "39cc1dcc27c51206a910510586d2d8a9",
+      "product": "Tines"
+    },
+    {
+      "action_inputs": [
+        {
+          "name": "Tenant domain",
+          "description": "The domain of the tenant.",
+          "required": true,
+          "type": "TEXT",
+          "ranking": 0,
+          "value": "\"<<META.tenant.domain>>\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"\\\"{}\\\"\""
+        },
+        {
+          "name": "Tines credential",
+          "description": "",
+          "required": false,
+          "type": "CREDENTIAL",
+          "ranking": 1073741824,
+          "value": "\"=CREDENTIAL.tines_resource_api_secret\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"\\\"{}\\\"\""
+        },
+        {
+          "name": "Resource ID",
+          "description": "The ID of the resource you are querying for. You can identify this with the INFO key.",
+          "required": false,
+          "type": "NUMBER",
+          "ranking": 1610612736,
+          "value": "\"=INFO.resource.rfm_count_weekly_results.id\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"\\\"{}\\\"\""
+        },
+        {
+          "name": "Is test resource?",
+          "description": "Select 'yes' to append an element to the test resource.",
+          "required": false,
+          "type": "BOOLEAN",
+          "ranking": 1879048192,
+          "value": "\"\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"\\\"{}\\\"\""
+        },
+        {
+          "name": "Array value",
+          "description": "The array to append to the resource. Use this input instead of the 'Text value' input if you are appending an array.",
+          "required": false,
+          "type": "OBJECT",
+          "ranking": 2013265920,
+          "value": "\"=append_rfm_host_numbers.weekly_object\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": false,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"\\\"{}\\\"\""
+        },
+        {
+          "name": "Text value",
+          "description": "The text to append to the resource. Use this input instead of the 'Array value' input if you are just appending text.",
+          "required": false,
+          "type": "TEXT",
+          "ranking": 2080374784,
+          "value": "\"\"",
+          "options": [
+            "Option 1",
+            "Option 2"
+          ],
+          "is_collapsed": true,
+          "sub_type": "HTML",
+          "multi_select_enabled": false,
+          "llm_json_schema": "\"\\\"{}\\\"\""
+        }
+      ],
+      "action_guid": "8912b702456dbf68a66d317e927053aa",
+      "product": "Tines"
+    }
+  ]
+}
